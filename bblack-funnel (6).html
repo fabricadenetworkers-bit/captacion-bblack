@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oportunidad B-Black</title>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: #111; padding: 30px; border-radius: 15px; border: 1px solid #333; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .btn-next { background: #eab308; color: #000; }
+        .btn-skip { background: #333; color: #fff; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #222; color: #fff; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="step-1">
+        <h2>Paso 1 de 3</h2>
+        <p>¿Tienes experiencia en Network Marketing?</p>
+        <button class="btn-next" onclick="next(2)">SÍ, TENGO EXPERIENCIA</button>
+        <button class="btn-skip" onclick="next(2)">NO, PERO QUIERO APRENDER</button>
+    </div>
+    <div id="step-2" class="hidden">
+        <h2>Paso 2 de 3</h2>
+        <p>¿Estás dispuesto a invertir en tu negocio?</p>
+        <button class="btn-next" onclick="next(3)">SÍ, ESTOY LISTO</button>
+        <button class="btn-skip" onclick="alert('Buscamos perfiles con mentalidad emprendedora.')">NO POR AHORA</button>
+    </div>
+    <div id="step-3" class="hidden">
+        <h2>Paso 3 de 3</h2>
+        <p>¿Tienes al menos 2 horas al día?</p>
+        <button class="btn-next" onclick="next('final')">SÍ, TENGO EL TIEMPO</button>
+        <button class="btn-skip" onclick="next('final')">TENGO POCO TIEMPO</button>
+    </div>
+    <div id="step-final" class="hidden">
+        <h2>¡CALIFICAS!</h2>
+        <p>Introduce tus datos para ver la presentación:</p>
+        <form id="leadForm">
+            <input type="text" id="nombre" placeholder="Tu Nombre" required>
+            <input type="email" id="email" placeholder="Tu Email" required>
+            <input type="tel" id="telefono" placeholder="WhatsApp (Ej: +34...)" required>
+            <button type="submit" class="btn-next">VER VIDEO AHORA</button>
+        </form>
+    </div>
+</div>
+<script>
+    const API_URL = "https://bblack-manager.vercel.app/api";
+    const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwF7oASk7eHpZ4j_J4KXBNJaHapFyj4y973ZycCIh2-AwDXJ5HOHUeJP0WntPKLJYwn/exec";
+    const params = new URLSearchParams(window.location.search);
+    const team = params.get('team') || 'default';
+
+    function next(step) {
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById('step-' + step).classList.remove('hidden');
+    }
+
+    document.getElementById('leadForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.innerText = "Registrando..."; btn.disabled = true;
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            email: document.getElementById('email').value,
+            telefono: document.getElementById('telefono').value,
+            lider_slug: team,
+            funnel_origen: 'captacion_calificada'
+        };
+        try {
+            await Promise.allSettled([
+                fetch(API_URL + '/leads', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) }),
+                fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(data) })
+            ]);
+            window.location.href = "index.html?team="+team+"&nombre="+data.nombre;
+        } catch (err) { window.location.href = "index.html?team="+team+"&nombre="+data.nombre; }
+    };
+</script>
+</body>
+</html>

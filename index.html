@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass B-Black</title>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; margin: 0; }
+        .header { padding: 40px; background: #111; }
+        .gold { color: #eab308; }
+        .video-wrapper { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border: 1px solid #333; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .cta { padding: 50px 20px; }
+        .btn { background: #eab308; color: #000; padding: 20px 30px; text-decoration: none; font-weight: 800; border-radius: 8px; display: inline-block; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="saludo">Cargando...</h1>
+        <p>Presentación exclusiva de negocio.</p>
+    </div>
+    <div class="video-wrapper">
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/TU_ID_VIDEO" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    <div class="cta">
+        <p>Líder asignado: <span id="leader-name" class="gold">...</span></p>
+        <a href="#" id="ws-link" class="btn">AGENDA TU LLAMADA 1 A 1</a>
+    </div>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const nombre = params.get('nombre') || 'Invitado';
+    const team = params.get('team') || 'default';
+    document.getElementById('saludo').innerText = "Bienvenido, " + nombre;
+
+    async function init() {
+        try {
+            const res = await fetch("https://bblack-manager.vercel.app/api/leaders?slug=" + team);
+            const leader = await res.json();
+            document.getElementById('leader-name').innerText = leader.nombre;
+            const msg = encodeURIComponent("Hola " + leader.nombre + ", soy " + nombre + ". Vi el video y quiero agendar mi llamada 1 a 1.");
+            document.getElementById('ws-link').href = "https://wa.me/" + leader.whatsapp.replace(/\+/g,'') + "?text=" + msg;
+        } catch (e) {
+            document.getElementById('leader-name').innerText = "Equipo B-Black";
+            document.getElementById('ws-link').href = "https://wa.me/34640900991";
+        }
+    }
+    init();
+</script>
+</body>
+</html>
